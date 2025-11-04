@@ -39,7 +39,8 @@ class NoTokenAvailable(Exception):
 
 
 class TokenProvider:
-    """Управляет токенами.
+    """
+    Управляет токенами.
 
     Attributes:
         __tokens (list[Token]): Список загруженных объектов Token.
