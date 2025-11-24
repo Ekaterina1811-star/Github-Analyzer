@@ -7,8 +7,9 @@ from dateutil.relativedelta import relativedelta
 
 from db_manager import DateBase
 from fetcher import ApiRateException, Fetcher
-from token_provider import TokenProvider
 from settings import settings
+from token_provider import TokenProvider
+
 
 class App:
     def __init__(self, db: DateBase, fetcher: Fetcher, token_provider: TokenProvider) -> None:
@@ -88,6 +89,16 @@ class App:
                 )
                 self.__fetcher.token.expired_at = datetime.now()
                 self.__fetcher.token = await self.__token_provider.get_token()
+                logging.error(f"Токен обновлен: {self.__fetcher.token.value}")
+                continue
+
+            except Exception as e:
+                logging.error(f"Ошибка обработки страницы {page}, {e}")
+
+            break
+
+
+
 
 
 
