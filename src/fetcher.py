@@ -18,7 +18,7 @@ class ApiRateException(Exception):
 
 class Fetcher:
     def __init__(self, token: Token, per_page: int = 100) -> None:
-        self.__per_page = per_page
+        self.__per_page = per_page # репозиториев на странице
         self.__token = token
         self.__httpx_client = httpx.AsyncClient()
 

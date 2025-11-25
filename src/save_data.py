@@ -32,14 +32,13 @@ class App:
     @staticmethod
     def __get_query(date: datetime) -> str:
         date_str = date.strftime("%Y-%m-%d")
-        return f"fork:false stars:>15 size:>1024 created:{date_str}"
+        return f"fork:false stars:>10 size:>1024 created:{date_str}"
 
 
     async def search_and_save(self, query: str) -> None:
         """Функция проходится по всем страницам для одного запроса"""
         for page in range(1, self.__get_request_count() + 1):
             await self.search_and_save_page(query, page)
-
 
 
     async def search_and_save_by_day(self, date: datetime) -> None:

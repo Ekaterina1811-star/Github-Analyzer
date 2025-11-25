@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import Field, SQLModel, select, func
 
 
-
 class RepoInfo(SQLModel, table=True):
     repo_id: int = Field(primary_key=True)
     full_name: str = Field(index=True)
@@ -27,11 +26,13 @@ class DataBase:
 
 
     async def init(self) -> None:
+        """Создает в базе данных таблицу"""
         async with self.engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.create_all)
 
 
     async def add_repo_info(self, infos: list[RepoInfo]) -> None:
+        """Добавляет объекты RepoInfo в таблицу в базе данных"""
         async with self.session() as session:
             async with session.begin():
                 infos = [RepoInfo.model_validate(info) for info in infos]
@@ -62,12 +63,17 @@ class DataBase:
                 return result.scalar()
 
 
-    async def get_repository_lifespans(
+    async def get_active_repository_lifespans(
             self,
             date_from: Optional[datetime] = None,
             date_to: Optional[datetime] = None,
+            active_after: datetime = datetime(2024, 1, 1),
     ) -> pd.DataFrame:
-        """Функция считает, сколько репозиториев живет 1, 2, 3... лет"""
+        """
+        Функция считает, сколько репозиториев живет 1, 2, 3... лет
+        от сегодняшнего момента - у которых последний коммит после
+        даты active_after
+        """
         if date_from is None:
             date_from = await self.min_date()
 
@@ -82,6 +88,7 @@ class DataBase:
                 #lifespan_days = func.julianday(RepoInfo.pushed_at) - func.julianday(RepoInfo.created_at)
                 query = (
                     select(age_years, func.count())
+                    .where(RepoInfo.pushed_at > active_after)
                     .where(RepoInfo.created_at.between(date_from, date_to))
                     .group_by(age_years)
                     )

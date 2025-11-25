@@ -25,7 +25,7 @@ async def plot_hist(
 
 async def main() -> None:
     db = DataBase(settings.db_url)
-    age_distribution = await db.get_repository_lifespans()
+    age_distribution = await db.get_active_repository_lifespans()
     max_date = await db.max_date()
 
     await plot_hist(db, max_date, age_distribution)

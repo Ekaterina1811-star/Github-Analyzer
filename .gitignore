@@ -136,3 +136,11 @@ dmypy.json
 
 # Игнорировать файл с токенами
 github_tokens.txt
+
+# База данных SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Сгенерированные изображения
+*.png
