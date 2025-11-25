@@ -20,7 +20,7 @@ class RepoInfo(SQLModel, table=True):
     forks_count: int
 
 
-class DateBase:
+class DataBase:
     def __init__(self, db_url: str):
         self.engine = create_async_engine(db_url, echo=False)
         self.session = async_sessionmaker(self.engine, expire_on_commit=False)

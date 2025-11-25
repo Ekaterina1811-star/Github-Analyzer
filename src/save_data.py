@@ -5,14 +5,14 @@ from datetime import datetime
 import tqdm
 from dateutil.relativedelta import relativedelta
 
-from db_manager import DateBase
+from db_manager import DataBase
 from fetcher import ApiRateException, Fetcher
 from settings import settings
 from token_provider import TokenProvider
 
 
 class App:
-    def __init__(self, db: DateBase, fetcher: Fetcher, token_provider: TokenProvider) -> None:
+    def __init__(self, db: DataBase, fetcher: Fetcher, token_provider: TokenProvider) -> None:
         self.__db = db
         self.__fetcher = fetcher
         self.__tqdm: tqdm.tqdm | None = None
@@ -98,7 +98,26 @@ class App:
             break
 
 
+async def main() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        filename="app_log.log",
+        filemode="w",
+        encoding="utf-8",
+        format="%(asctime)s%(levelname)s %(message)s",
+    )
+    db = DataBase(settings.db_url)
+    await db.init()
 
+    token_proivder = TokenProvider(settings.path_to_tokens)
+    fetcher = Fetcher(await token_proivder.get_token())
+
+    app = App(db, fetcher, token_proivder)
+    await app.fetch_and_save_repos()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 
 
