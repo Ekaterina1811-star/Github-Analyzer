@@ -17,3 +17,31 @@ class PictureGenerator:
         plt.grid(axis="y", linestyle="--", alpha=0.7)
         plt.tight_layout() # для отступов
         plt.savefig(f"hist_{title}.png")
+
+
+    @staticmethod
+    def generate_pie_picture(data: pd.DataFrame, title: str):
+        fig, ax = plt.subplots(
+            figsize=(20, 15),
+            subplot_kw=dict(aspect="equal"),
+            dpi=300,
+        )
+        wedges, texts, autotexts = ax.pie(
+            data,
+            autopct=lambda pct: f"{pct: .if}%", # Формат подписи процентов
+            textprops=dict(color="w", rotation=0), # Текст внутри
+            colors=plt.cm.Dark2.colors,
+            startangle=45,
+        )
+        ax.legend(
+            wedges,
+            data.index,
+            title="Языки",
+            loc="center left",
+            bbox_to_anchor=(1, 0, 0.5, 1), # Координаты: справа от графика
+            fontsize=24, # Размер шрифта названий
+            title_fontsize=28, # Размер шрифта заголовка "Языки"
+        )
+        plt.setp(autotexts, size=18, weight=700) # подписи внутри
+        ax.set_title(title, fontsize=46)
+        plt.savefig(f"pie_{title}.png")
