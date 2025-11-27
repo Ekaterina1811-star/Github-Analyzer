@@ -14,9 +14,9 @@ class RepoInfo(SQLModel, table=True):
     language: Optional[str] = Field(index=True)
     created_at: datetime
     pushed_at: datetime
-    contributors_count: Optional[int] = Field(default=None)
     stars_count: int
     forks_count: int
+    age_years: int
 
 
 class DataBase:
@@ -49,7 +49,6 @@ class DataBase:
                 query = select(func.min(RepoInfo.created_at))
                 result = await session.execute(query)
                 return result.scalar()
-
 
 
     async def max_date(self) -> datetime:
@@ -98,6 +97,36 @@ class DataBase:
                     columns=["age_years", "count"]
                 )
                 dataframe.set_index("age_years", inplace=True)
+                return dataframe
+
+
+    async def get_language(
+            self,
+            age: int,
+            active_after: datetime = datetime(2024, 1, 1),
+    ) -> pd.DataFrame:
+        """
+        Возвращает топ языков для репозиториев конкретного возраста.
+        :param age: Возраст репозитория
+        :param active_after: учитывает репозитории, последний коммит которых
+        сделан после указанной даты
+        :return: DataFrame со столбцами: language, count
+        """
+        async with self.session() as session:
+            async with session.begin():
+                query = (
+                    select(RepoInfo.language, func.count())
+                    .where(RepoInfo.language.isnot(None))
+                    .where(RepoInfo.age_years == age)
+                    .where(RepoInfo.pushed_at > active_after)
+                    .group_by(RepoInfo.language)
+                )
+                result = await session.execute(query)
+                dataframe = pd.DataFrame(
+                    result.all(),
+                    columns=["language", "count"]
+                )
+                dataframe.set_index("language", inplace=True)
                 return dataframe
 
 
