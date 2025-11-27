@@ -7,6 +7,11 @@ from sqlalchemy import Integer
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import Field, SQLModel, select, func
 
+from settings import settings
+
+
+ACTIVE_AFTER = settings.active_date
+
 
 class RepoInfo(SQLModel, table=True):
     repo_id: int = Field(primary_key=True)
@@ -16,7 +21,7 @@ class RepoInfo(SQLModel, table=True):
     pushed_at: datetime
     stars_count: int
     forks_count: int
-    age_years: int
+    age_years: Optional[int] = None
 
 
 class DataBase:
@@ -31,10 +36,17 @@ class DataBase:
             await conn.run_sync(SQLModel.metadata.create_all)
 
 
-    async def add_repo_info(self, infos: list[RepoInfo]) -> None:
+    async def add_repo_info(
+            self,
+            infos: list[RepoInfo],
+    ) -> None:
         """Добавляет объекты RepoInfo в таблицу в базе данных"""
         async with self.session() as session:
             async with session.begin():
+                now = datetime.now()
+                for info in infos:
+                    if info.pushed_at > ACTIVE_AFTER:
+                        info.age_years = (now - info.created_at).days // 365
                 infos = [RepoInfo.model_validate(info) for info in infos]
                 session.add_all(infos)
                 await session.commit()
@@ -65,8 +77,7 @@ class DataBase:
     async def get_active_repository_lifespans(
             self,
             date_from: Optional[datetime] = None,
-            date_to: Optional[datetime] = None,
-            active_after: datetime = datetime(2024, 1, 1),
+            date_to: Optional[datetime] = None
     ) -> pd.DataFrame:
         """
         Функция считает, сколько репозиториев живет 1, 2, 3... лет
@@ -81,15 +92,15 @@ class DataBase:
 
         async with self.session() as session:
             async with session.begin():
-                age_years = func.cast(
-                    (func.julianday("now") - func.julianday(RepoInfo.created_at)) / 365, Integer
-                ).label("age_years")
+                #age_years = func.cast(
+                    #(func.julianday("now") - func.julianday(RepoInfo.created_at)) / 365, Integer
+                #).label("age_years")
                 #lifespan_days = func.julianday(RepoInfo.pushed_at) - func.julianday(RepoInfo.created_at)
                 query = (
-                    select(age_years, func.count())
-                    .where(RepoInfo.pushed_at > active_after)
+                    select(RepoInfo.age_years, func.count())
+                    .where(RepoInfo.pushed_at > ACTIVE_AFTER)
                     .where(RepoInfo.created_at.between(date_from, date_to))
-                    .group_by(age_years)
+                    .group_by(RepoInfo.age_years)
                     )
                 result = await session.execute(query)
                 dataframe = pd.DataFrame(
