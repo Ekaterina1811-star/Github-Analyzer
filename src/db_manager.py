@@ -92,10 +92,6 @@ class DataBase:
 
         async with self.session() as session:
             async with session.begin():
-                #age_years = func.cast(
-                    #(func.julianday("now") - func.julianday(RepoInfo.created_at)) / 365, Integer
-                #).label("age_years")
-                #lifespan_days = func.julianday(RepoInfo.pushed_at) - func.julianday(RepoInfo.created_at)
                 query = (
                     select(RepoInfo.age_years, func.count())
                     .where(RepoInfo.pushed_at > ACTIVE_AFTER)
