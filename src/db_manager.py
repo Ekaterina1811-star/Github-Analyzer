@@ -141,6 +141,29 @@ class DataBase:
                 return dataframe
 
 
+    async def get_count_last_push(self) -> pd.DataFrame:
+        """
+        Возвращает, сколько репозиториев
+        сделали свой последний коммит в каждом году
+        """
+        async with self.session() as session:
+            async with session.begin():
+                # year_of_last_push = func.strftime('%Y', RepoInfo.pushed_at).label("year")
+
+                query = (
+                    select(
+                        func.strftime("%Y", RepoInfo.pushed_at).label("year"),
+                        func.count(),
+                    )
+                    .group_by("year")
+                )
+                result = await session.execute(query)
+                dataframe = pd.DataFrame(
+                    result.all(),
+                    columns=["year", "count"]
+                )
+                dataframe.set_index("year", inplace=True)
+                return dataframe
 
 
 
