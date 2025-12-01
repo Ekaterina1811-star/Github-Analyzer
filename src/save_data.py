@@ -32,7 +32,7 @@ class App:
     @staticmethod
     def __get_query(date: datetime) -> str:
         date_str = date.strftime("%Y-%m-%d")
-        return f"fork:false stars:>10 size:>1024 created:{date_str}"
+        return f"fork:false created:{date_str}"
 
 
     async def search_and_save(self, query: str) -> None:
@@ -108,10 +108,10 @@ async def main() -> None:
     db = DataBase(settings.db_url)
     await db.init()
 
-    token_proivder = TokenProvider(settings.path_to_tokens)
-    fetcher = Fetcher(await token_proivder.get_token())
+    token_provider = TokenProvider(settings.path_to_tokens)
+    fetcher = Fetcher(await token_provider.get_token())
 
-    app = App(db, fetcher, token_proivder)
+    app = App(db, fetcher, token_provider)
     await app.fetch_and_save_repos()
 
 

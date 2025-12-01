@@ -12,6 +12,9 @@ from settings import settings
 async def plot_hist(
         db: DataBase,
         max_date: datetime,
+        title: str,
+        x_title: str,
+        y_title: str,
         age_distribution: pd.DataFrame,
 ) -> None:
     """
@@ -19,7 +22,9 @@ async def plot_hist(
     """
     PictureGenerator.generate_histogram_picture(
         age_distribution["count"],
-        "Распределение репозиториев по возрасту"
+        title,
+        x_title,
+        y_title,
     )
 
 
@@ -30,26 +35,12 @@ async def plot_pie(
     Строит круговые диаграммы распределения
     языков для репозиториев конкретного возраста
     """
-    for age in [1, 2, 3, 5, 7, 10, 15, 18]:
+    for age in [2025, 2024, 2023, 2022, 2021, 2020, 2018, 2016, 2012, 2010]:
         counts_languages = await db.get_language(age)
     counts_languages_top_10 = counts_languages.nlargest(10, "count")
 
     PictureGenerator.generate_pie_picture(
-        counts_languages_top_10["count"], f"Языки в активных репозиториях {age} лет"
-    )
-
-
-async def plot_hist_push(
-        db: DataBase,
-        max_date: datetime,
-        push_distribution: pd.DataFrame,
-) -> None:
-    """
-    Строит гистограммы распределения репозиториев по возрасту (в годах).
-    """
-    PictureGenerator.generate_histogram_picture(
-        push_distribution["count"],
-        "Последние коммиты репозиториев по годам"
+        counts_languages_top_10["count"], f"Языки в активных репозиториях c {age} года"
     )
 
 
@@ -58,9 +49,32 @@ async def main() -> None:
     age_distribution = await db.get_active_repository_lifespans()
     max_date = await db.max_date()
     push_distribution = await db.get_count_last_push()
-    await plot_hist(db, max_date, age_distribution)
+    create_distribution = await db.get_count_created_repo()
+    await plot_hist(
+        db,
+        max_date,
+        "Распределение репозиториев по возрасту",
+        "Года создания",
+        "Количество репозиториев",
+        age_distribution,
+    )
     await plot_pie(db)
-    await plot_hist(db, max_date, push_distribution)
+    await plot_hist(
+        db,
+        max_date,
+        "Последние коммиты репозиториев по годам",
+        "Года",
+        "Количество репозиториев, сделавших последний коммит",
+        push_distribution,
+    )
+    await plot_hist(
+        db,
+        max_date,
+        "Количество созданных репозиториев в каждый год",
+        "Года",
+        "Количество созданных репозиториев",
+        create_distribution
+    )
 
 
 if __name__ == "__main__":
