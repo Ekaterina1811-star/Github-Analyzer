@@ -37,11 +37,20 @@ async def plot_pie(
     """
     for age in [2025, 2024, 2023, 2022, 2021, 2020, 2018, 2016, 2012, 2010]:
         counts_languages = await db.get_language(age)
-    counts_languages_top_10 = counts_languages.nlargest(10, "count")
+        counts_languages_top_10 = counts_languages.nlargest(10, "count")
 
-    PictureGenerator.generate_pie_picture(
-        counts_languages_top_10["count"], f"Языки в активных репозиториях c {age} года"
-    )
+        PictureGenerator.generate_pie_picture(
+            counts_languages_top_10["count"], f"Языки в активных репозиториях c {age} года"
+        )
+
+
+async def plot_lines(
+        db: DataBase,
+        max_date: datetime,
+        counts_last_year: pd.DataFrame,
+) -> None:
+    """Строит линейный график"""
+    pass
 
 
 async def main() -> None:
@@ -64,7 +73,7 @@ async def main() -> None:
         max_date,
         "Последние коммиты репозиториев по годам",
         "Года",
-        "Количество репозиториев, сделавших последний коммит",
+        "Количество репозиториев",
         push_distribution,
     )
     await plot_hist(
@@ -72,7 +81,7 @@ async def main() -> None:
         max_date,
         "Количество созданных репозиториев в каждый год",
         "Года",
-        "Количество созданных репозиториев",
+        "Количество репозиториев",
         create_distribution
     )
 

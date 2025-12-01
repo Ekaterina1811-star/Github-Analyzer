@@ -33,9 +33,9 @@ class PictureGenerator:
         )
         wedges, texts, autotexts = ax.pie(
             data,
-            autopct=lambda pct: f"{pct: .if}%", # Формат подписи процентов
+            autopct=lambda pct: f"{pct:.1f}%", # Формат подписи процентов
             textprops=dict(color="w", rotation=0), # Текст внутри
-            colors=plt.cm.Dark2.colors,
+            colors=plt.cm.Set2.colors,
             startangle=45,
         )
         ax.legend(
@@ -49,6 +49,7 @@ class PictureGenerator:
         )
         plt.setp(autotexts, size=18, weight=700) # подписи внутри
         ax.set_title(title, fontsize=46)
+        plt.tight_layout()
         plt.savefig(f"pie_{title}.png")
 
 

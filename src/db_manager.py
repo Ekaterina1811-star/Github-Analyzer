@@ -107,7 +107,7 @@ class DataBase:
     ) -> pd.DataFrame:
         """
         Возвращает топ языков для репозиториев конкретного возраста.
-        :param age: Возраст репозитория
+        :param year_created: Год создания репозитория
         :param active_after: учитывает репозитории, последний коммит которых
         сделан после указанной даты
         :return: DataFrame со столбцами: language, count
