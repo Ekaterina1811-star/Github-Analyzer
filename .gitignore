@@ -133,3 +133,16 @@ dmypy.json
 .idea/
 /media/
 /static/bootstrap/
+
+# Игнорировать файл с токенами
+github_tokens.txt
+
+# База данных SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Сгенерированные изображения
+*.png
+
+backups/
