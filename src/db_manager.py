@@ -1,9 +1,7 @@
 import pandas as pd
-import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Integer
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import Field, SQLModel, select, func
 
@@ -38,11 +36,11 @@ class DataBase:
             infos: list[RepoInfo],
     ) -> None:
         """Добавляет объекты RepoInfo в таблицу в базе данных"""
-        async with self.session() as session:
+        async with self.session() as session: # открыли сессию
             async with session.begin():
                 infos = [RepoInfo.model_validate(info) for info in infos]
-                session.add_all(infos)
-                await session.commit()
+                session.add_all(infos) # Экземпляры добавлены в память, а не в БД
+                await session.commit() # Сохранили изменения в БД
 
 
     async def min_date(self) -> datetime:
@@ -103,13 +101,10 @@ class DataBase:
     async def get_language(
             self,
             year_created: int,
-            active_after: datetime = datetime(2024, 1, 1),
     ) -> pd.DataFrame:
         """
         Возвращает топ языков для репозиториев конкретного возраста.
         :param year_created: Год создания репозитория
-        :param active_after: учитывает репозитории, последний коммит которых
-        сделан после указанной даты
         :return: DataFrame со столбцами: language, count
         """
         async with self.session() as session:
@@ -118,7 +113,7 @@ class DataBase:
                     select(RepoInfo.language, func.count())
                     .where(RepoInfo.language.isnot(None))
                     .where(func.strftime("%Y", RepoInfo.created_at) == str(year_created))
-                    .where(RepoInfo.pushed_at > active_after)
+                    .where(RepoInfo.pushed_at > ACTIVE_AFTER)
                     .group_by(RepoInfo.language)
                 )
                 result = await session.execute(query)

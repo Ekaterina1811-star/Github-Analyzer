@@ -144,3 +144,5 @@ github_tokens.txt
 
 # Сгенерированные изображения
 *.png
+
+backups/

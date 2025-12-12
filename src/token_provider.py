@@ -87,9 +87,9 @@ class TokenProvider:
             for token in self.__tokens:
                 if token.expired_at is None:
                     return token
-                if (datetime.now() - token.expired_at).total_seconds() >= 70:
+                if (datetime.now() - token.expired_at).total_seconds() >= 3660:
                     token.expired_at = None
                     return token
                 continue
-            await asyncio.sleep(70)
+            await asyncio.sleep(3660)
 

@@ -11,6 +11,8 @@ from settings import settings
 from token_provider import TokenProvider
 
 
+max_repos = settings.max_repos
+
 class App:
     def __init__(self, db: DataBase, fetcher: Fetcher, token_provider: TokenProvider) -> None:
         self.__db = db
@@ -22,7 +24,6 @@ class App:
     def __get_request_count(self) -> int:
         """Количество страниц запроса"""
         per_page = self.__fetcher.per_page
-        max_repos = settings.max_repos
         if max_repos % per_page == 0:
             return max_repos // per_page
         else:
