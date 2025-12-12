@@ -131,7 +131,6 @@ dmypy.json
 .vscode
 
 .idea/
-/media/
 /static/bootstrap/
 
 # Игнорировать файл с токенами
@@ -148,3 +147,4 @@ github_tokens.txt
 backups/
 
 *.log
+*.tmp
